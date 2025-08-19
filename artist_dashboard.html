@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artist Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 36px;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    .input-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .input-container input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 250px;
+      font-size: 16px;
+    }
+
+    #addBtn {
+      display: block;
+      margin: 0 auto 40px auto;
+      padding: 12px 24px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #addBtn:hover {
+      background-color: #0056b3;
+    }
+
+    #artistList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    .card h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .card p {
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .card ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    .card button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+      margin-right: 5px;
+      font-size: 14px;
+    }
+
+    .edit-btn {
+      background-color: #ffc107;
+    }
+
+    .edit-btn:hover {
+      background-color: #e0a800;
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+    }
+
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Artist Dashboard</h1>
+
+  <div class="input-container">
+    <input id="name" placeholder="Artist Name" />
+    <input id="salary" type="number" placeholder="Salary" />
+    <input id="songs" placeholder="Songs (comma separated)" />
+  </div>
+
+  <button id="addBtn">Add Artist</button>
+
+  <div id="artistList"></div>
+
+  <script>
+    let artists = JSON.parse(localStorage.getItem("artists")) || [];
+
+    function renderArtists() {
+      const list = document.getElementById("artistList");
+      list.innerHTML = "";
+      artists.forEach((artist, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+          <h2>${artist.name}</h2>
+          <p>Salary: $${artist.salary.toLocaleString()}</p>
+          <h3>Songs:</h3>
+          <ul>${artist.songs.map(song => `<li>${song}</li>`).join("")}</ul>
+          <button class='edit-btn' onclick='editArtist(${index})'>Edit</button>
+          <button class='delete-btn' onclick='deleteArtist(${index})'>Delete</button>
+        `;
+
+        list.appendChild(card);
+      });
+    }
+
+    function addArtist() {
+      const name = document.getElementById("name").value.trim();
+      const salary = document.getElementById("salary").value;
+      const songs = document.getElementById("songs").value.split(",").map(s => s.trim()).filter(Boolean);
+      if (!name || !salary) return;
+
+      artists.push({ name, salary: parseFloat(salary), songs });
+      localStorage.setItem("artists", JSON.stringify(artists));
+      document.getElementById("name").value = "";
+      document.getElementById("salary").value = "";
+      document.getElementById("songs").value = "";
+      renderArtists();
+    }
+
+    function deleteArtist(index) {
+      artists.splice(index, 1);
+      localStorage.setItem("artists", JSON.stringify(artists));
+      renderArtists();
+    }
+
+    function editArtist(index) {
+      const artist = artists[index];
+      const newName = prompt("Edit name:", artist.name) || artist.name;
+      const newSalary = parseFloat(prompt("Edit salary:", artist.salary)) || artist.salary;
+      const newSongs = prompt("Edit songs (comma separated):", artist.songs.join(", "))
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      artists[index] = { name: newName, salary: newSalary, songs: newSongs };
+      localStorage.setItem("artists", JSON.stringify(artists));
+      renderArtists();
+    }
+
+    document.getElementById("addBtn").addEventListener("click", addArtist);
+    renderArtists();
+  </script>
+</body>
+</html>
